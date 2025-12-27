@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hacker Portal - Escape Ways</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    body{margin:0;background:#000;color:#0f0;font-family:"Courier New",monospace;}
+    .navbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#111;border-bottom:2px solid #0f0;box-shadow:0 0 12px #0f0;}
+    nav a{color:#0f0;margin-left:10px;padding:6px 10px;border:1px solid #0f0;text-decoration:none} nav a:hover{background:#0f0;color:#000}
+    #map{height:60vh; width:90%; max-width:960px; margin:16px auto; border:1px solid #0a0; border-radius:8px; box-shadow:0 0 20px #0f0a;}
+    .panel{max-width:960px;margin:0 auto;background:#111;border:1px solid #0a0;padding:12px;border-radius:8px}
+    .panel label{display:block;margin:8px 0 4px}
+    .panel input{width:100%;padding:8px;background:#0b0b0b;border:1px solid #0a0;color:#0f0;border-radius:4px}
+    .row{display:flex;gap:8px;margin-top:8px}
+    .btn{border:1px solid #0f0;color:#0f0;background:none;padding:8px 12px;cursor:pointer} .btn:hover{background:#0f0;color:#000}
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div>⚡ Hacker Portal ⚡</div>
+    <nav>
+      <a href="index.html">Home</a><a href="dashboard.html">Missions</a><a href="scan.html">Scan</a><a href="run.html">Run</a><a href="shutdown.html">Shutdown</a><a href="map.html">Map</a><a href="escape.html">Escape</a><a href="profile.html">Profile</a><a href="resources.html">Resources</a><a href="contacts.html">Emergency</a><a href="cctv.html">CCTV</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2 style="text-align:center">Escape ways (simulated routing)</h2>
+    <div id="map"></div>
+    <div class="panel">
+      <label for="start">Start (lat,lng)</label><input id="start" placeholder="e.g., 17.3850,78.4867">
+      <label for="end">Destination (lat,lng)</label><input id="end" placeholder="e.g., 17.4500,78.3800">
+      <div class="row">
+        <button class="btn" onclick="plotRoute()">Plot escape route</button>
+        <button class="btn" onclick="clearRoute()">Clear route</button>
+        <button class="btn" onclick="safePoints()">Add nearby safe points</button>
+      </div>
+      <p style="color:#0a0">This planner uses polylines and markers for simulation. Use real routes only via authorized tools.</p>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([17.3850,78.4867], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+    let routeLine = null; let routeMarkers = [];
+    function parseLatLng(str){ const parts = str.split(',').map(s=>parseFloat(s.trim())); if(parts.length!==2 || parts.some(isNaN)) return null; return parts; }
+    function plotRoute(){
+      const s = parseLatLng(start.value), e = parseLatLng(end.value);
+      if(!s || !e){ alert('Enter valid lat,lng for both start and destination.'); return; }
+      clearRoute();
+      const pts = [s, e];
+      routeLine = L.polyline(pts, { color:'#0f0' }).addTo(map);
+      routeMarkers.push(L.marker(s).addTo(map).bindPopup('Start').openPopup());
+      routeMarkers.push(L.marker(e).addTo(map).bindPopup('Destination'));
+      map.fitBounds(routeLine.getBounds(), { padding:[20,20] });
+    }
+    function clearRoute(){ if(routeLine){ map.removeLayer(routeLine); routeLine = null; } routeMarkers.forEach(m=>map.removeLayer(m)); routeMarkers = []; }
+    function safePoints(){ const c = map.getCenter(); const deltas = [[0.01,0.01],[-0.01,0.01],[0.01,-0.01],[-0.01,-0.01]];
+      deltas.forEach(([dx,dy],i)=>{ const m = L.marker([c.lat+dx, c.lng+dy]).addTo(map).bindPopup(`Safe point ${i+1}`).openPopup(); routeMarkers.push(m); });
+    }
+  </script>
+
+  <footer class="footer" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#111;border-top:2px solid #0f0;box-shadow:0 -2px 12px #0f0;color:#0f0;">
+    <div><span id="clock"></span></div><div id="logs" style="flex:1;text-align:center;font-size:.85rem;white-space:nowrap"></div><div><span>System Status: <strong>ONLINE</strong></span></div>
+  </footer>
+  <div class="command-bar" style="background:#000;border-top:1px solid #0f0;padding:8px 16px;display:flex;gap:8px">
+    <input id="commandInput" placeholder="> scan, run, shutdown, missions, map, escape, profile, resources, contacts, home"><button onclick="executeCommand()">Run</button>
+  </div>
+  <script>
+    function updateClock(){ const now=new Date(); clock.textContent=`📟 ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`; } setInterval(updateClock,1000); updateClock();
+    const messages=["Escape planner ready.","Connection stable.","Monitoring traffic..."]; function addLog(){ const line=document.createElement("div"); line.textContent="> "+messages[Math.floor(Math.random()*messages.length)]; logs.appendChild(line); if(logs.children.length>5) logs.removeChild(logs.firstChild);} setInterval(addLog,3000); addLog();
+    function executeCommand(){ const cmd=commandInput.value.trim().toLowerCase(); const routes={scan:"scan.html",run:"run.html",shutdown:"shutdown.html",missions:"dashboard.html",map:"map.html",escape:"escape.html",profile:"profile.html",resources:"resources.html",contacts:"contacts.html",home:"index.html"}; if(routes[cmd]) window.location.href=routes[cmd]; else alert("Unknown command."); }
+  </script>
+</body>
+</html>

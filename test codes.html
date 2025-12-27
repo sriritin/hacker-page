@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>⚠️ SYSTEM BREACH ⚠️</title>
+  <style>
+    body {
+      background:#000;
+      color:red;
+      font-family:"Courier New",monospace;
+      text-align:center;
+      padding-top:15%;
+    }
+    h1 {
+      font-size:3rem;
+      animation:blink 1s infinite;
+      text-shadow:0 0 10px red,0 0 20px #f00;
+    }
+    p {
+      margin-top:20px;
+      font-size:1.2rem;
+    }
+    a {
+      color:#0f0;
+      text-decoration:none;
+      border:1px solid #0f0;
+      padding:6px 12px;
+      border-radius:6px;
+    }
+    a:hover {
+      background:#0f0;
+      color:#000;
+    }
+    @keyframes blink {
+      0%, 49%, 100% { opacity:1; }
+      50% { opacity:0; }
+    }
+    .glitch {
+      position: relative;
+      display:inline-block;
+    }
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 0;
+      width: 100%;
+      color: red;
+      clip: rect(0, 900px, 0, 0);
+      animation: glitchAnim 2s infinite linear alternate-reverse;
+    }
+    .glitch::before { text-shadow: -2px 0 #0ff; }
+    .glitch::after { text-shadow: 2px 0 #f0f; }
+    @keyframes glitchAnim {
+      0% { clip: rect(10px, 9999px, 40px, 0); }
+      50% { clip: rect(50px, 9999px, 90px, 0); }
+      100% { clip: rect(20px, 9999px, 60px, 0); }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="glitch" data-text="SYSTEM BREACH DETECTED">SYSTEM BREACH DETECTED</h1>
+  <p id="userMsg">Unauthorized access detected. Immediate action required.</p>
+  <p><a href="index.html">Return to Dashboard</a></p>
+
+  <!-- Alarm sound -->
+  <audio id="alarm" src="alarm.mp3" autoplay loop></audio>
+
+  <script>
+    // Ensure alarm plays even if autoplay is blocked
+    window.addEventListener('click',()=>document.getElementById('alarm').play());
+
+    // Get logged-in user from localStorage
+    const user = JSON.parse(localStorage.getItem('hp_user')||'null');
+    if(user){
+      document.getElementById('userMsg').textContent =
+        "Unauthorized access detected for user: " + user.username + ". Immediate action required.";
+    }
+  </script>
+</body>
+</html>

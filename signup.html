@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Safe Hacker Portal — Signup</title>
+  <style>
+    body{background:#000;color:#0f0;font-family:"Courier New",monospace;display:flex;justify-content:center;align-items:center;height:100vh}
+    .panel{background:#111;padding:20px;border:1px solid #0f0;border-radius:8px;box-shadow:0 0 12px #0f0;width:300px}
+    input{width:100%;padding:8px;margin:8px 0;background:#000;border:1px solid #0f0;color:#0f0}
+    button{width:100%;padding:10px;background:none;border:1px solid #0f0;color:#0f0;cursor:pointer}
+    button:hover{background:#0f0;color:#000}
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h2>Signup</h2>
+    <input id="username" placeholder="Choose username">
+    <input id="password" type="password" placeholder="Choose password">
+    <button onclick="signup()">Create Account</button>
+    <p style="font-size:.8rem">Already have an account? <a href="login.html" style="color:#0f0">Login</a></p>
+  </div>
+  <script>
+    function signup(){
+      const username=document.getElementById('username').value;
+      const password=document.getElementById('password').value;
+      let users=JSON.parse(localStorage.getItem('hp_users')||'[]');
+      if(users.find(u=>u.username===username)){alert('Username already exists');return;}
+      users.push({username,password});
+      localStorage.setItem('hp_users',JSON.stringify(users));
+      alert('Account created! Please login.');
+      location.href='login.html';
+    }
+  </script>
+</body>
+</html>
